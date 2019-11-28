@@ -1,0 +1,76 @@
+syntax="proto2";
+package wirepas.proto.gateway_api;
+import "wp_global.proto";
+
+message MaerskReq {
+	required MaerskReqHeader header = 1;
+	oneof GatewayOrClientReq {
+		// will be populated on every request to gateway
+		MaerskGatewayReq gateway_req = 2;
+		// will be populated on every request to client(s)
+		// currently empty message. Placeholder.
+		MaerskClientReq client_req = 3;
+	}
+}
+
+message MaerskResp {
+	required MaerskRespHeader header = 1;
+	oneof GatewayOrClientResp {
+		// to be populated on every message initiated from gateway
+		MaerskGatewayResp gateway_resp = 2;
+		// to be populated on every message/response initiated from client
+		// currently empty message. Placeholder.
+		MaerskClientResp client_resp = 3;
+	}
+}
+
+message MaerskReqHeader {
+// gateway ignores any message older than timestamp
+	required uint64 time_to_live_epoch_ms = 1;
+}
+
+message MaerskRespHeader {
+	// gateway timestamp in epoch millis
+	required uint64 gateway_epoch_ms = 1;
+	// to be populated only for mobile gateways
+	optional MaerskLocation location = 2;
+}
+
+message MaerskClientReq {
+}
+
+message MaerskClientResp {
+}
+
+message MaerskGatewayReq {
+	required RequestHeader header = 1;
+	oneof Requests {
+		MaerskGatewayStatusReq gw_status_req = 2;
+	}
+}
+
+message MaerskGatewayResp {
+	required ResponseHeader header = 1;
+	oneof Responses {
+		MaerskGatewayStatusResp gw_status_resp = 2;
+	}
+}
+
+message MaerskGatewayStatusResp {
+	// in percentage. Range between 0 to 100.
+	optional float battery = 1;
+	optional string app_software = 2;
+	optional string wirepas_software = 3;
+	// Gateway SIM IMSI
+	optional uint64 imsi = 4;
+}
+
+message MaerskLocation {
+	// in decimal degrees. Range between -90 to 90
+	required double latitude = 1;
+	// in decimal degrees. Range between -180 to 180
+	required double longitude = 2;
+}
+
+message MaerskGatewayStatusReq {
+}
