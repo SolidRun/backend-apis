@@ -11,6 +11,7 @@
 
 # flake8: noqa
 
+from .gateway_pb2 import *
 from .config_message_pb2 import *
 from .data_message_pb2 import *
 from .error_pb2 import *
