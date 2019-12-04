@@ -46,6 +46,7 @@ message MaerskGatewayReq {
 	required RequestHeader header = 1;
 	oneof Requests {
 		MaerskGatewayStatusReq gw_status_req = 2;
+		MaerskGatewaySetRtcReq gw_setrtc_req = 3;
 	}
 }
 
@@ -53,6 +54,7 @@ message MaerskGatewayResp {
 	required ResponseHeader header = 1;
 	oneof Responses {
 		MaerskGatewayStatusResp gw_status_resp = 2;
+		MaerskGatewaySetRtcResp gw_setrtc_resp = 3;
 	}
 }
 
@@ -74,3 +76,7 @@ message MaerskLocation {
 
 message MaerskGatewayStatusReq {
 }
+
+message MaerskGatewaySetRtcReq {}
+
+message MaerskGatewaySetRtcResp {}
