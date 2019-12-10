@@ -10,6 +10,7 @@
 import wirepas_messaging
 
 from .event import Event
+from .response import Response
 from .wirepas_exceptions import GatewayAPIParsingException
 from time import time
 
@@ -143,8 +144,6 @@ class ReceivedDataEvent(Event):
             event.hop_count = self.hop_count
 
         # Maersk addon
-        message.customer.customer_name = "Maersk"
-        message.customer.response.header.gateway_epoch_ms = int(time() * 1000)
-        message.customer.response.client_resp.SetInParent()
+        Response.add_client_status(message)
 
         return message.SerializeToString()

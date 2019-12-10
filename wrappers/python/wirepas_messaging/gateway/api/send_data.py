@@ -159,6 +159,8 @@ class SendDataResponse(Response):
     @property
     def payload(self):
         message = wirepas_messaging.gateway.GenericMessage()
+        # Maersk addon
+        Response.add_client_status(message)
 
         response = message.wirepas.send_packet_resp
         response.header.CopyFrom(self._make_response_header())

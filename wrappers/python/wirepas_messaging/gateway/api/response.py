@@ -10,6 +10,7 @@
 import wirepas_messaging
 from .gateway_result_code import GatewayResultCode
 
+from time import time
 
 class Response(object):
     """
@@ -73,3 +74,21 @@ class Response(object):
             d["sink_id"] = None
 
         return d
+
+    @staticmethod
+    def add_client_status(message):
+        message.customer.customer_name = "Maersk"
+        message.customer.response.header.gateway_epoch_ms = int(time() * 1000)
+        message.customer.response.client_resp.SetInParent()
+
+    @staticmethod
+    def add_gateway_status(message, req_id):
+        message.customer.customer_name = "Maersk"
+        message.customer.response.header.gateway_epoch_ms = int(time() * 1000)
+
+        message.customer.response.gateway_resp.header.req_id = req_id
+        message.customer.response.gateway_resp.header.gw_id = Response.gw_id
+        message.customer.response.gateway_resp.header.res = GatewayResultCode.GW_RES_OK.value
+        message.customer.response.gateway_resp.gw_status_resp.app_software = Response.firmware;
+        message.customer.response.gateway_resp.gw_status_resp.wirepas_software = Response.wirepas_version
+        message.customer.response.gateway_resp.gw_status_resp.imsi = Response.imsi
