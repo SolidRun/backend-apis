@@ -29,8 +29,9 @@ class GetConfigsRequest(Request):
         req_id (int): unique request id
     """
 
-    def __init__(self, req_id=None, **kwargs):
+    def __init__(self, req_id=None, maersk_req_id=None, **kwargs):
         super(GetConfigsRequest, self).__init__(req_id=req_id, **kwargs)
+        self.maersk_req_id = maersk_req_id
 
     @classmethod
     def from_payload(cls, payload):
@@ -41,8 +42,11 @@ class GetConfigsRequest(Request):
             # Any Exception is promoted to Generic API exception
             raise GatewayAPIParsingException("Cannot parse GetConfigsRequest payload")
 
+        # Maersk addon
+        Request._check_fields(message)
+
         d = Request._parse_request_header(message.wirepas.get_configs_req.header)
-        return cls(d["req_id"])
+        return cls(d["req_id"], message.customer.request.gateway_req.header.req_id)
 
     @property
     def payload(self):
@@ -99,6 +103,8 @@ class GetConfigsResponse(Response):
     @property
     def payload(self):
         message = wirepas_messaging.gateway.GenericMessage()
+        # Maersk addon
+        Response.add_config_status(message, self.maersk_req_id, self.res)
 
         response = message.wirepas.get_configs_resp
         response.header.CopyFrom(self._make_response_header())

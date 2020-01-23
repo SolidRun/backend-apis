@@ -48,10 +48,11 @@ class SetConfigRequest(Request):
         req_id (int): unique request id
     """
 
-    def __init__(self, sink_id, new_config, req_id=None, **kwargs):
+    def __init__(self, sink_id, new_config, req_id=None, maersk_req_id=None, **kwargs):
         super(SetConfigRequest, self).__init__(req_id=req_id, **kwargs)
         self.sink_id = sink_id
         self.new_config = new_config
+        self.maersk_req_id = maersk_req_id
 
     @classmethod
     def from_payload(cls, payload):
@@ -61,6 +62,9 @@ class SetConfigRequest(Request):
         except Exception:
             # Any Exception is promoted to Generic API exception
             raise GatewayAPIParsingException("Cannot parse SetConfigRequest payload")
+
+        # Maersk addon
+        Request._check_fields(message)
 
         req = message.wirepas.set_config_req
 
@@ -74,7 +78,7 @@ class SetConfigRequest(Request):
         parse_config_rw(req.config, new_config)
         parse_config_keys(req.config, new_config)
 
-        return cls(req.config.sink_id, new_config, d["req_id"])
+        return cls(req.config.sink_id, new_config, d["req_id"], message.customer.request.gateway_req.header.req_id)
 
     @property
     def payload(self):
@@ -133,6 +137,8 @@ class SetConfigResponse(Response):
     @property
     def payload(self):
         message = wirepas_messaging.gateway.GenericMessage()
+        # Maersk addon
+        Response.add_config_status(message, self.maersk_req_id, self.res)
 
         response = message.wirepas.set_config_resp
         response.header.CopyFrom(self._make_response_header())

@@ -92,3 +92,13 @@ class Response(object):
         message.customer.response.gateway_resp.gw_status_resp.app_software = Response.firmware;
         message.customer.response.gateway_resp.gw_status_resp.wirepas_software = Response.wirepas_version
         message.customer.response.gateway_resp.gw_status_resp.imsi = Response.imsi
+
+    @staticmethod
+    def add_config_status(message, req_id, res):
+        message.customer.customer_name = "Maersk"
+        message.customer.response.header.gateway_epoch_ms = int(time() * 1000)
+
+        message.customer.response.gateway_resp.header.req_id = req_id
+        message.customer.response.gateway_resp.header.gw_id = Response.gw_id
+        message.customer.response.gateway_resp.header.res = res.value
+

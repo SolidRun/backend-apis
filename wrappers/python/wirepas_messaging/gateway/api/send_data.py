@@ -14,8 +14,6 @@ from .response import Response
 
 from .wirepas_exceptions import GatewayAPIParsingException
 
-from time import time
-
 
 class SendDataRequest(Request):
     """
@@ -67,16 +65,8 @@ class SendDataRequest(Request):
             # Any Exception is promoted to Generic API exception
             raise GatewayAPIParsingException("Cannot parse SendDataRequest payload")
 
-        # Check the Maersk optional fields
-        if not message.HasField('customer') or not message.customer.HasField('request'):
-            raise GatewayAPIParsingException("Cannot parse customer field")
-
-        # Check TTL
-        request = message.customer.request
-        epoch_ms = int(time() * 1000)
-        if epoch_ms > request.header.time_to_live_epoch_ms:
-            raise GatewayAPIParsingException("ttl expired - (gateway {} < request {})".format(epoch_ms, request.header.time_to_live_epoch_ms))
-
+        # Maersk addon
+        Request._check_fields(message)
 
         req = message.wirepas.send_packet_req
         d = Request._parse_request_header(req.header)

@@ -10,6 +10,8 @@
 import random
 import wirepas_messaging
 
+from time import time
+from .wirepas_exceptions import GatewayAPIParsingException
 
 class Request(object):
     """
@@ -65,3 +67,17 @@ class Request(object):
             d["sink_id"] = None
 
         return d
+
+
+    @staticmethod
+    def _check_fields(message):
+        # Check the Maersk optional fields
+        if not message.HasField('customer') or not message.customer.HasField('request'):
+            raise GatewayAPIParsingException("Cannot parse customer field")
+
+        # Check TTL
+        request = message.customer.request
+        epoch_ms = int(time() * 1000)
+        if epoch_ms > request.header.time_to_live_epoch_ms:
+            raise GatewayAPIParsingException("ttl expired - (gateway {} < request {})".format(epoch_ms, request.header.time_to_live_epoch_ms))
+
