@@ -59,7 +59,7 @@ class SendDataRequest(Request):
         self.hop_limit = hop_limit
 
     @classmethod
-    def from_payload(cls, payload):
+    def from_payload(cls, payload, logger=None):
         message = wirepas_messaging.gateway.GenericMessage()
         try:
             message.ParseFromString(payload)
@@ -68,15 +68,18 @@ class SendDataRequest(Request):
             raise GatewayAPIParsingException("Cannot parse SendDataRequest payload")
 
         # Check the Maersk optional fields
-        if not message.HasField('customer') or not message.customer.HasField('request'):
-            raise GatewayAPIParsingException("Cannot parse customer field")
+        if message.HasField('customer'):
+            if not message.customer.HasField('request'):
+                raise GatewayAPIParsingException("Cannot parse customer field")
 
-        # Check TTL
-        request = message.customer.request
-        epoch_ms = int(time() * 1000)
-        if epoch_ms > request.header.time_to_live_epoch_ms:
-            raise GatewayAPIParsingException("ttl expired - (gateway {} < request {})".format(epoch_ms, request.header.time_to_live_epoch_ms))
+            # Check TTL
+            request = message.customer.request
+            epoch_ms = int(time() * 1000)
+            if epoch_ms > request.header.time_to_live_epoch_ms:
+                raise GatewayAPIParsingException("ttl expired - (gateway {} < request {})".format(epoch_ms, request.header.time_to_live_epoch_ms))
 
+        elif logger is not None:
+            logger.warning("Missing customer field")
 
         req = message.wirepas.send_packet_req
         d = Request._parse_request_header(req.header)
